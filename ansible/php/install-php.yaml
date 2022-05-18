@@ -1,0 +1,53 @@
+---
+- hosts: host2
+  tasks:
+  - name: "Update apt cache"
+    become: yes
+    apt:
+      update_cache: yes
+
+  - name: "Install php-fpm package"
+    become: yes
+    apt:
+      name: "php-fpm"
+      state: present
+
+  - name: "Stop php7.4-fpm service"
+    become: yes
+    service:
+      name: php7.4-fpm
+      state: stopped
+
+  - name: "Remove port config file"
+    become: yes
+    file:
+      path: /etc/php/7.4/fpm/pool.d/www.conf
+      state: absent      
+
+  - name: "Copy modified config file"
+    become: yes
+    copy:
+      src: /home/hikedaya/ansible/php/config/www.conf
+      dest: /etc/php/7.4/fpm/pool.d/www.conf
+
+  - name: "Start and Enable php7.4-fpm service"
+    become: yes
+    service:
+      name: php7.4-fpm
+      state: started
+      enabled: yes
+
+  - name: "Check if apache2 exists"
+    shell: systemctl --type=service | grep "apache2.service"
+    ignore_errors: yes
+    register: apache2_service
+
+  - name: "Enable proxy module if apache2 exists"
+    become: yes
+    shell: a2enmod proxy_fcgi setenvif
+    when: apache2_service.stdout | length > 0
+
+  - name: "Enable php7.4 config if apache2 exists"
+    become: yes
+    shell: a2enconf php7.4-fpm
+    when: apache2_service.stdout | length > 0

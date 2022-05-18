@@ -1,0 +1,59 @@
+---
+- hosts: host3
+  tasks:
+
+  - name: Add an Apt signing key, uses whichever key is at the URL
+    become: yes
+    apt_key:
+      url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+      state: present
+
+  - name: Add PGSQL repository into sources list using specified filename
+    become: yes
+    apt_repository:
+      repo: deb http://apt.postgresql.org/pub/repos/apt focal-pgdg main
+      state: present
+      filename: pgdg.list
+
+  - name: Update and install PGSQL12
+    become: yes
+    apt:
+      update_cache: yes
+      name: postgresql-12
+      state: present
+
+  - name: Update and install PGSQL-client-12
+    become: yes
+    apt:
+      update_cache: yes
+      name: postgresql-client-12
+      state: present
+
+  - name: Initialize PG cluster
+    become: yes
+    shell: pg_ctlcluster 12 main start
+
+  - name: Stop postgresql-12 service
+    become: yes
+    service:
+      name: postgresql@12-main
+      state: stopped
+
+  - name: Copy modified postgresql.conf file
+    become: yes
+    copy:
+      src: /home/hikedaya/ansible/postgresql/config/postgresql.conf
+      dest: /etc/postgresql/12/main/postgresql.conf
+
+  - name: Copy modified pg_hba.conf file
+    become: yes
+    copy:
+      src: /home/hikedaya/ansible/postgresql/config/pg_hba.conf
+      dest: /etc/postgresql/12/main/pg_hba.conf
+
+  - name: Start postgresql-12 service
+    become: yes
+    service:
+      name: postgresql@12-main
+      state: started
+      enabled: yes

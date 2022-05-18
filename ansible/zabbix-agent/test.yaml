@@ -1,0 +1,9 @@
+---
+- hosts: host2:host3
+  gather_facts: yes
+  tasks:
+      - name: gather os specific variables
+        become: yes
+        shell: tail /var/log/syslog > /tmp/tail.txt
+        
+

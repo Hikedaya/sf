@@ -1,0 +1,3 @@
+all:
+    hosts:
+        cloud-ubuntu2.hikedaya.net:

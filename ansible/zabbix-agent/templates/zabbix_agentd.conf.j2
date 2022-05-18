@@ -1,0 +1,6 @@
+PidFile=/run/zabbix/zabbix_agentd.pid
+LogFile=/var/log/zabbix/zabbix_agentd.log
+LogFileSize=0
+Server=host1.hikedaya.net
+Hostname={{ ansible_hostname }}
+Include=/etc/zabbix/zabbix_agentd.d/*.conf
